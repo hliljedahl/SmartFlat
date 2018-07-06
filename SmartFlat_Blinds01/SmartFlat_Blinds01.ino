@@ -56,8 +56,8 @@ const char* server = "192.168.0.107";
 //Unique device ID
 const char* mqttDeviceID = "HampDaChamp-SmartFlat-Blinds01";
 
-const int stepPin = 4; 
-const int dirPin = 2; 
+const int dc1 = 2; 
+const int dc2 = 0; 
 const int butPin = 5;
 const int halPin = 14;
       int stats = 0;
@@ -65,6 +65,8 @@ const int halPin = 14;
       int currentPos = 0;
       int travel = 0;
       int dirr = 0;
+      int up = 1;
+      int reset = 1; 
 
 /* ---------- DO NOT EDIT ANYTHING BELOW THIS LINE ---------- */
 
@@ -99,8 +101,8 @@ void setup() {
 
   MDNS.addService("http", "tcp", 80);
 
-  pinMode(stepPin,OUTPUT); 
-  pinMode(dirPin,OUTPUT);
+  pinMode(dc1,OUTPUT); 
+  pinMode(dc2,OUTPUT);
   pinMode(butPin,INPUT);
   pinMode(halPin,INPUT);
 
@@ -128,61 +130,11 @@ void loop() {
   //Serial.println("Update");
   httpServer.handleClient();
 
-  if(digitalRead(butPin)){
-    while(digitalRead(butPin)){
-      delay(2);
-    }
-    Serial.println("Homing");
-    //Home without hall effect.
-    digitalWrite(dirPin,LOW);
-    while (digitalRead(halPin)){
-      digitalWrite(stepPin,HIGH); 
-      delayMicroseconds(1500); 
-      digitalWrite(stepPin,LOW); 
-      delayMicroseconds(1500); 
-    }
-    Serial.println("Homed");
-    currentPos = 0;
-  }  
-  if (travel){
-    //for (int x = 0; x <= travel; x++) {
-    digitalWrite(stepPin,HIGH); 
-    delayMicroseconds(1500); 
-    digitalWrite(stepPin,LOW); 
-    delayMicroseconds(1500); 
-    //Serial.println(x);
-    //}
-    travel--;
-    if(dirr){
-      currentPos--;
-    }
-    else{
-      currentPos++;
-    }
-    //Serial.println(currentPos);
-  }    
-    /* //Home without hall effect.
-    digitalWrite(dirPin,LOW);
-    travel = currentPos;
-    
-    Serial.print("Travel: ");
-    Serial.println(travel);
-    if (travel){
-      for (int x = 0; x <= travel; x++) {
-      digitalWrite(stepPin,HIGH); 
-      delayMicroseconds(1500); 
-      digitalWrite(stepPin,LOW); 
-      delayMicroseconds(1500); 
-      //Serial.println(x);
-      }
-    }
-    currentPos = 0;
-    Serial.print("CurrentPos: ");
-    Serial.println(currentPos);
-  */
+  /********************************************************************************************
+   * ******************************************************************************************
   
-  
-  
+   
+  */  
 }
 
 void messageReceived(String &topic, String &payload) {
@@ -191,29 +143,27 @@ void messageReceived(String &topic, String &payload) {
   int msgInt = msgString.toInt();
 
   int dest = map(msgInt, 0, 100, 0, maxLength);
- 
-  Serial.print("CurrentPos: ");
-  Serial.println(currentPos);
-  Serial.print("Input: ");
-  Serial.println(msgInt);
-  Serial.print("Destination: ");
-  Serial.println(dest);
-  
-  if (currentPos < dest) {
-    digitalWrite(dirPin,HIGH);
-    travel = dest - currentPos;
-    dirr = 0;
+  if(reset == 1){
+    
   }
-  else if (currentPos > dest) {
-    digitalWrite(dirPin,LOW);
-    travel = currentPos - dest;
-    dirr = 1;
+  if(msgInt == 0){
+    if(up == 1){
+      digitalWrite(dc1, HIGH);
+      digitalWrite(dc2, LOW);
+      delay(2000);
+      up = 0;
+      digitalWrite(dc1, LOW);
+    } 
   }
-  else{
-    travel = 0;
+  if(msgInt == 1){
+    if(up == 0){
+      digitalWrite(dc1, LOW);
+      digitalWrite(dc2, HIGH);
+      delay(2000);
+      up = 1;
+      digitalWrite(dc2, LOW);
+    }
   }
-  //currentPos = dest;
-  Serial.print("Travel: ");
-  Serial.println(travel);
-
+    
+  Serial.print("CurrentPos: ");  
 }
