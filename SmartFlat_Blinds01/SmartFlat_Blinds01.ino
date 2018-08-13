@@ -150,7 +150,7 @@ void messageReceived(String &topic, String &payload) {
     if(up == 1){
       digitalWrite(dc1, HIGH);
       digitalWrite(dc2, LOW);
-      delay(2000);
+      delay(6800);
       up = 0;
       digitalWrite(dc1, LOW);
     } 
@@ -159,7 +159,7 @@ void messageReceived(String &topic, String &payload) {
     if(up == 0){
       digitalWrite(dc1, LOW);
       digitalWrite(dc2, HIGH);
-      delay(2000);
+      delay(7200);
       up = 1;
       digitalWrite(dc2, LOW);
     }
